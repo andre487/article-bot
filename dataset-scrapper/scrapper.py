@@ -16,6 +16,7 @@ SCHEMA_HABR = {
 }
 
 space_replacer = re.compile(r'\s+')
+url_replacer = re.compile(r'https?://([^/]+)(?:/.+)?$')
 
 
 def get_page_content(url: str) -> str:
@@ -57,7 +58,7 @@ def get_node_text(result_set: Any) -> str:
     if len(result_set):
         item = result_set[0]
         texsts = item.findAll(text=lambda x: isinstance(x, NavigableString))
-        return space_replacer.sub(' ', ' '.join(texsts).strip())
+        return url_replacer.sub(r'\1', space_replacer.sub(' ', ' '.join(texsts).strip()))
     return ''
 
 

@@ -14,7 +14,7 @@ def main():
 
 @main.command()
 @click.option('--start-page', default='https://habr.com/ru/all/top100/', show_default=True)
-@click.option('--page-count', default=10, show_default=True)
+@click.option('--page-count', default=50, show_default=True)
 @click.argument('result_file', required=True)
 def habr(start_page: str, page_count: int, result_file: str):
     contents = []
