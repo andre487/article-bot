@@ -3,7 +3,7 @@ import re
 from typing import Any, Dict, List
 
 import requests
-from bs4 import BeautifulSoup, NavigableString
+from bs4 import BeautifulSoup
 
 SCHEMA_HABR = {
     'domain': 'habr.com',
@@ -16,7 +16,6 @@ SCHEMA_HABR = {
 }
 
 space_replacer = re.compile(r'\s+')
-url_replacer = re.compile(r'https?://([^/]+)(?:/.+)?$')
 
 
 def get_page_content(url: str) -> str:
@@ -57,15 +56,15 @@ def parse_page(schema: Dict[str, str], contents: List[str]) -> List[Dict[str, st
 def get_node_text(result_set: Any) -> str:
     if len(result_set):
         item = result_set[0]
-        texsts = item.findAll(text=lambda x: isinstance(x, NavigableString))
-        return url_replacer.sub(r'\1', space_replacer.sub(' ', ' '.join(texsts).strip()))
+        texsts = item.find_all(string=True)
+        return space_replacer.sub(' ', ' '.join(texsts).strip())
     return ''
 
 
 def parse_tags(result_set: Any) -> List[str]:
     result = []
     for item in result_set:
-        texsts = item.findAll(text=lambda x: isinstance(x, NavigableString))
+        texsts = item.find_all(string=True)
         result.append(' '.join(texsts).strip())
     return result
 
