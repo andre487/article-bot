@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 SCHEMA_HABR = {
     'domain': 'habr.com',
+    'user_in_list': '.tm-user-snippet__nickname',
     'article': 'article.tm-articles-list__item',
     'title': '.tm-article-snippet__title span',
     'preview': '.tm-article-body',
@@ -24,7 +25,22 @@ def get_page_content(url: str) -> str:
     return resp.text
 
 
-def parse_page(schema: Dict[str, str], contents: List[str]) -> List[Dict[str, str]]:
+def parse_users(schema: Dict[str, str], contents: List[str]) -> List[str]:
+    users = []
+    for content in contents:
+        soup = BeautifulSoup(content, 'lxml')
+        for user_node in soup.select(schema['user_in_list']):
+            user_name = get_node_text(user_node)
+            if user_name.startswith('@'):
+                user_name = user_name[1:]
+            users.append(user_name)
+    return users
+
+
+def parse_page(schema: Dict[str, str], contents: List[str], const_fields: Dict[str, str] = None) -> List[Dict[str, str]]:
+    if const_fields is None:
+        const_fields = {}
+
     articles = []
     for content in contents:
         soup = BeautifulSoup(content, 'lxml')
@@ -41,6 +57,7 @@ def parse_page(schema: Dict[str, str], contents: List[str]) -> List[Dict[str, st
                 article=art_text,
                 tags=parse_tags(art.select(schema['tag'])),
                 link=art_url,
+                **const_fields,
             )
             articles.append(art_data)
 
@@ -55,7 +72,9 @@ def parse_page(schema: Dict[str, str], contents: List[str]) -> List[Dict[str, st
 
 def get_node_text(result_set: Any) -> str:
     if len(result_set):
-        item = result_set[0]
+        item = result_set
+        if not getattr(item, 'find_all', None):
+            item = result_set[0]
         texsts = item.find_all(string=True)
         return space_replacer.sub(' ', ' '.join(texsts).strip())
     return ''
