@@ -131,3 +131,4 @@ dmypy.json
 # Project files
 result.json
 result.*.json
+habr-*.json
